@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ja" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3年C組 スマート時間割</title>
+    <!-- Favicon & Home Screen Icon (inline SVG/PNG data URI for local file support) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='h' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230071e3'/%3E%3Cstop offset='100%25' stop-color='%23005bb5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='100' fill='%23fff'/%3E%3Crect y='0' width='512' height='180' rx='100' fill='url(%23h)'/%3E%3Crect x='0' y='80' width='512' height='100' fill='url(%23h)'/%3E%3Ccircle cx='130' cy='100' r='18' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='382' cy='100' r='18' fill='%23fff' opacity='.5'/%3E%3Crect x='112' y='24' width='36' height='96' rx='18' fill='%23d0d0d5'/%3E%3Crect x='364' y='24' width='36' height='96' rx='18' fill='%23d0d0d5'/%3E%3Ctext x='256' y='400' text-anchor='middle' font-family='-apple-system,SF Pro Display,Helvetica,sans-serif' font-size='240' font-weight='700' fill='%230071e3'%3EC%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='h' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230071e3'/%3E%3Cstop offset='100%25' stop-color='%23005bb5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='100' fill='%23fff'/%3E%3Crect y='0' width='512' height='180' rx='100' fill='url(%23h)'/%3E%3Crect x='0' y='80' width='512' height='100' fill='url(%23h)'/%3E%3Ccircle cx='130' cy='100' r='18' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='382' cy='100' r='18' fill='%23fff' opacity='.5'/%3E%3Crect x='112' y='24' width='36' height='96' rx='18' fill='%23d0d0d5'/%3E%3Crect x='364' y='24' width='36' height='96' rx='18' fill='%23d0d0d5'/%3E%3Ctext x='256' y='400' text-anchor='middle' font-family='-apple-system,SF Pro Display,Helvetica,sans-serif' font-size='240' font-weight='700' fill='%230071e3'%3EC%3C/text%3E%3C/svg%3E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="3年C組">
+    <!-- Tailwind CSS (JIT via CDN for dynamic styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Allow manual dark mode toggling
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: [
+                            '-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"',
+                            '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'
+                        ],
+                    },
+                    colors: {
+                        apple: {
+                            bg: '#f5f5f7',
+                            darkBg: '#000000',
+                            cardLight: 'rgba(255, 255, 255, 0.75)',
+                            cardDark: 'rgba(28, 28, 30, 0.75)',
+                            blue: '#0071e3',
+                            blueHover: '#0077ED',
+                            gray: '#86868b',
+                            darkGray: '#98989d',
+                            textLight: '#1d1d1f',
+                            textDark: '#f5f5f7',
+                            borderLight: 'rgba(0, 0, 0, 0.1)',
+                            borderDark: 'rgba(255, 255, 255, 0.15)',
+                            accent: '#ff3b30',
+                            success: '#34c759',
+                            warning: '#ffcc00'
+                        }
+                    },
+                    boxShadow: {
+                        'apple': '0 4px 24px rgba(0, 0, 0, 0.04)',
+                        'apple-hover': '0 8px 32px rgba(0, 0, 0, 0.08)',
+                        'apple-dark': '0 4px 24px rgba(0, 0, 0, 0.4)',
+                        'apple-glow': '0 0 20px rgba(0, 113, 227, 0.5), 0 0 8px rgba(0, 113, 227, 0.4)'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'refined-pulse': 'refinedPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'progress-stripes': 'progress-stripes 1s linear infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        refinedPulse: {
+                            '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+                            '50%': { transform: 'scale(1.02)', opacity: '0.9' },
+                        },
+                        'progress-stripes': {
+                            '0%': { 'background-position': '1rem 0' },
+                            '100%': { 'background-position': '0 0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --glass-blur: blur(24px);
+            --glass-blur-heavy: blur(40px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+            --spring: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        html.dark { color-scheme: dark; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color, #f5f5f7);
+            color: var(--text-color, #1d1d1f);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            transition: background-color 0.5s var(--spring), color 0.5s var(--spring);
+            letter-spacing: -0.012em;
+        }
+        .dark body { --bg-color: #000000; --text-color: #f5f5f7; }
+        ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+
+        /* Subtle background */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,113,227,0.04) 0%, transparent 60%);
+        }
+        .dark body::before {
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,113,227,0.06) 0%, transparent 60%);
+        }
+
+        /* Glass panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 1px 12px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6);
+            transition: box-shadow 0.3s ease, transform 0.3s var(--spring), background 0.3s ease;
+        }
+        .glass-panel:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+        .dark .glass-panel {
+            background: rgba(30, 30, 32, 0.65);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 1px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+        .dark .glass-panel:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+
+        .tap-effect { transition: transform 0.2s var(--spring), opacity 0.2s ease; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.7; }
+        .modal-backdrop { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background-color: rgba(0,0,0,0.3); }
+        .dark .modal-backdrop { background-color: rgba(0,0,0,0.5); }
+        .timetable-grid { display: grid; grid-template-columns: 80px repeat(6, minmax(140px, 1fr)); gap: 10px; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .progress-bar-striped {
+            background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+        }
+        .memo-tab-active { position: relative; }
+        .memo-tab-active::after {
+            content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 3px; border-radius: 3px; background: #0071e3;
+            animation: tabSlideIn 0.25s var(--spring) forwards;
+        }
+        @keyframes tabSlideIn { from { width: 0; opacity: 0; } to { width: 20px; opacity: 1; } }
+
+        .cell-hover { transition: transform 0.25s var(--spring), box-shadow 0.25s ease; }
+        .cell-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+        .dark .cell-hover:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        textarea:focus { box-shadow: 0 0 0 4px rgba(0,113,227,0.12); border-radius: 12px; }
+        .dark textarea:focus { box-shadow: 0 0 0 4px rgba(0,113,227,0.2); }
+        .countdown-item { transition: transform 0.2s var(--spring); }
+        .countdown-item:hover { transform: scale(1.06); }
+
+        /* Subject color dot */
+        .subj-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+        /* Floating dock */
+        .floating-dock {
+            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            z-index: 40; max-width: 560px; width: calc(100% - 32px);
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(48px) saturate(180%); -webkit-backdrop-filter: blur(48px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.55);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5);
+            border-radius: 24px; padding: 10px 16px;
+            transition: all 0.4s var(--spring);
+        }
+        .floating-dock:hover { box-shadow: 0 16px 56px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06); }
+        .dark .floating-dock {
+            background: rgba(28,28,30,0.78);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .dark .floating-dock:hover { box-shadow: 0 16px 56px rgba(0,0,0,0.45); }
+        .dock-progress { height: 3px; border-radius: 2px; transition: width 1s linear; }
+        .dock-ring { width: 36px; height: 36px; border-radius: 50%; position: relative; flex-shrink: 0; }
+        .dock-ring svg { transform: rotate(-90deg); }
+        .dock-ring circle { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+        .dock-pulse { animation: dockPulse 2s ease-in-out infinite; }
+        @keyframes dockPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Stats bar */
+        .stat-bar { height: 6px; border-radius: 3px; transition: width 0.6s var(--spring); }
+
+        /* Greeting shimmer */
+        .shimmer-text {
+            background: linear-gradient(90deg, #1d1d1f 40%, #0071e3 50%, #1d1d1f 60%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        .dark .shimmer-text {
+            background: linear-gradient(90deg, #f5f5f7 40%, #0071e3 50%, #f5f5f7 60%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        @keyframes shimmer { 0%,100% { background-position: 200% center; } 50% { background-position: 0% center; } }
+    </style>
+</head>
+<body class="relative min-h-screen pb-28 bg-apple-bg text-apple-textLight dark:bg-apple-darkBg dark:text-apple-textDark selection:bg-apple-blue selection:text-white">
+
+    <div id="floating-dock"></div>
+
+    <div id="app" class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 flex flex-col gap-8 opacity-0 transition-opacity duration-500">
+        <!-- JS-built UI -->
+    </div>
+
+    <div id="portal-root"></div>
+
+    <script>
+        /**
+         * 1. データ定義
+         */
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const DAY_NAMES = { Mon: '月曜日', Tue: '火曜日', Wed: '水曜日', Thu: '木曜日', Fri: '金曜日', Sat: '土曜日', Sun: '日曜日' };
+        const TIME_SLOTS = [
+            { id: 'SHR', name: 'SHR', start: '08:25', end: '08:40', type: 'homeroom' },
+            { id: 'p1', name: '1時間目', start: '08:45', end: '09:35', type: 'class' },
+            { id: 'p2', name: '2時間目', start: '09:45', end: '10:35', type: 'class' },
+            { id: 'p3', name: '3時間目', start: '10:45', end: '11:35', type: 'class' },
+            { id: 'p4', name: '4時間目', start: '11:45', end: '12:35', type: 'class' },
+            { id: 'lunch', name: '昼休み', start: '12:35', end: '13:20', type: 'break' },
+            { id: 'p5', name: '5時間目', start: '13:20', end: '14:10', type: 'class' },
+            { id: 'p6', name: '6時間目', start: '14:20', end: '15:10', type: 'class' },
+            { id: 'after', name: '最終下校', start: '15:10', end: '18:30', type: 'afterschool' }
+        ];
+        const CYCLE_SUBJECTS = {
+            CYCLE_WED: { A: { subject: 'サイエンス', teacher: '西田、小川、岩崎、關沢' }, B: { subject: '技術', teacher: '岩田、直塚' } },
+            CYCLE_SAT: { A: { subject: 'GC', teacher: '横山、岡田晋' }, B: { subject: 'IT', teacher: '山岡、長嶋' } }
+        };
+        const MASTER_TIMETABLE = {
+            Mon: { SHR: { subject: 'SHR', teacher: '米川' }, p1: { subject: '英語α', teacher: '渡邊' }, p2: { subject: '美術', teacher: '高橋尚' }, p3: { subject: '数学乙', teacher: '宮内' }, p4: { subject: '公民甲', teacher: '苅屋' }, p5: { subject: '数学甲', teacher: '長嶋' }, p6: { subject: 'SD', teacher: '学年教員' } },
+            Tue: { SHR: { subject: 'SHR', teacher: '米川' }, p1: { subject: '体育', teacher: '宮崎・千葉' }, p2: { subject: '英語β', teacher: '村上' }, p3: { subject: '道徳', teacher: '米川' }, p4: { subject: 'HR', teacher: '米川' }, p5: { subject: '国語乙', teacher: '伊藤澄' }, p6: { subject: '理科2', teacher: '小川博' } },
+            Wed: { SHR: { subject: 'SHR', teacher: '宮崎' }, p1: { subject: '英語α', teacher: '渡邊・ダニエラ' }, p2: { subject: '音楽', teacher: '野川' }, p3: { subject: 'CYCLE_WED', teacher: '' }, p4: { subject: 'CYCLE_WED', teacher: '' }, p5: { subject: '理科1', teacher: '菅沼' }, p6: { subject: '体育サブ', teacher: '片桐' } },
+            Thu: { SHR: { subject: 'SHR', teacher: '米川' }, p1: { subject: '英語β', teacher: '村上・ダニエラ' }, p2: { subject: '国語甲', teacher: '岡田晋' }, p3: { subject: '体育', teacher: '宮崎・千葉' }, p4: { subject: '数学甲', teacher: '長嶋' }, p5: { subject: '数学乙', teacher: '宮内' }, p6: { subject: 'SD', teacher: '学年教員' } },
+            Fri: { SHR: { subject: 'SHR', teacher: '米川・岩田' }, p1: { subject: '理科1', teacher: '米川' }, p2: { subject: '国語乙', teacher: '伊藤澄' }, p3: { subject: '国語甲', teacher: '岡田晋' }, p4: { subject: '公民乙', teacher: '大橋' }, p5: { subject: '理科2', teacher: '小川博' }, p6: { subject: 'SD', teacher: '学年教員' } },
+            Sat: { SHR: { subject: 'SHR', teacher: '米川' }, p1: { subject: '公民甲', teacher: '苅屋' }, p2: { subject: '公民乙', teacher: '大橋' }, p3: { subject: 'CYCLE_SAT', teacher: '' }, p4: { subject: 'CYCLE_SAT', teacher: '' } }
+        };
+        const SUBJECT_COLORS = {
+            '英語α': '#0071e3', '英語β': '#147ce5', '数学甲': '#5856d6', '数学乙': '#7d5dbd',
+            '国語甲': '#ff6482', '国語乙': '#e8446a', '理科1': '#34c759', '理科2': '#30b050',
+            '公民甲': '#ff9f0a', '公民乙': '#e8910a', '体育': '#ff3b30', '体育サブ': '#ff453a',
+            '美術': '#bf5af2', '音楽': '#ff2d55', '技術': '#64d2ff', 'サイエンス': '#5ac8fa',
+            'GC': '#30d158', 'IT': '#64d2ff', 'SD': '#ffd60a', 'SHR': '#86868b',
+            '道徳': '#ac8e68', 'HR': '#a2845e', 'default': '#86868b'
+        };
+        const COUNTDOWN_EVENTS = [
+            { name: '1学期中間', date: '5/19' }, { name: '1学期期末', date: '7/1' },
+            { name: '海外教育旅行', date: '9/9' }, { name: '芝生祭', date: '10/3' },
+            { name: '2学期中間', date: '10/13' }, { name: '2学期期末', date: '12/4' },
+            { name: '学年末', date: '3/2' }
+        ];
+
+        /**
+         * 2. SVGアイコン
+         */
+        const Icons = {
+            Apple: `<svg viewBox="0 0 384 512" fill="currentColor" class="w-full h-full"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>`,
+            Clock: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
+            Calendar: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>`,
+            Settings: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>`,
+            Edit: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>`,
+            Check: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>`,
+            XMark: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`,
+            Reset: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>`,
+            ArrowRight: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>`,
+            Book: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>`,
+            Pencil: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>`,
+            Sun: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.95-4.243-1.59-1.59M3 12h2.25m.386-6.364 1.591 1.591M12 12a2.25 2.25 0 0 0-2.25 2.25 2.25 2.25 0 0 0 2.25 2.25s.67-.098 1.13-.28M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>`,
+            Moon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21c3.089 0 5.842-1.157 7.898-3.002Z" /></svg>`,
+            Desktop: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z" /></svg>`,
+            Copy: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>`,
+            BellOn: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>`,
+            BellOff: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M9.143 17.082a24.248 24.248 0 0 0 3.844.148m-3.844-.148a23.856 23.856 0 0 1-5.455-1.31 8.964 8.964 0 0 0 2.3-5.542m3.155 6.852a3 3 0 0 0 5.667 1.97m1.965-2.277L21 21m-4.225-4.225a23.867 23.867 0 0 0 3.536-1.003A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6.53 6.53m10.245 10.245L6.53 6.53M3 3l3.53 3.53" /></svg>`,
+            Chart: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>`
+        };
+
+        /**
+         * 3. ユーティリティ
+         */
+        const Utils = {
+            timeStringToDate(timeStr) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                const date = new Date();
+                date.setHours(hours, minutes, 0, 0);
+                return date;
+            },
+            formatTime(date) { return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`; },
+            getCurrentStatus() {
+                const now = new Date();
+                const dayIndex = now.getDay();
+                const dayKey = Object.keys(DAY_NAMES)[dayIndex - 1] || (dayIndex === 0 ? 'Sun' : 'Sat');
+                if (dayKey === 'Sun' || (dayKey === 'Sat' && now > this.timeStringToDate('12:35'))) return { type: 'holiday', title: '本日の授業は終了しました', current: null, next: null };
+                for (let i = 0; i < TIME_SLOTS.length; i++) {
+                    const slot = TIME_SLOTS[i];
+                    const start = this.timeStringToDate(slot.start);
+                    const end = this.timeStringToDate(slot.end);
+                    if (now >= start && now <= end) {
+                        const progress = ((now - start) / (end - start)) * 100;
+                        const remainingMinutes = Math.ceil((end - now) / 60000);
+                        return { type: 'ongoing', slot, progress, remainingMinutes, dayKey };
+                    }
+                    if (now < start) {
+                        const minutesToNext = Math.ceil((start - now) / 60000);
+                        return { type: 'break', nextSlot: slot, minutesToNext, dayKey };
+                    }
+                }
+                return { type: 'afterschool', title: '最終下校時刻を過ぎています', current: null, next: null };
+            },
+            escapeHtml(str) {
+                if (typeof str !== 'string') return str;
+                return str.replace(/[&<>"']/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[tag]));
+            },
+            getWeekDates() {
+                const today = new Date();
+                const currentDay = today.getDay();
+                const dates = {};
+                const dayMap = { 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+                for (const day of DAYS) {
+                    const targetDay = dayMap[day];
+                    const date = new Date(today);
+                    const dayDifference = targetDay - (currentDay === 0 ? 7 : currentDay);
+                    date.setDate(today.getDate() + dayDifference);
+                    dates[day] = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+                }
+                return dates;
+            },
+            getSubjectColor(subject) {
+                for (const [key, color] of Object.entries(SUBJECT_COLORS)) {
+                    if (subject && subject.includes(key)) return color;
+                }
+                return SUBJECT_COLORS['default'];
+            },
+            getGreeting() {
+                const h = new Date().getHours();
+                if (h < 7) return 'おはようございます';
+                if (h < 10) return 'おはようございます';
+                if (h < 12) return '午前の授業、頑張ろう';
+                if (h < 14) return 'お昼休みを楽しもう';
+                if (h < 16) return '午後もあと少し！';
+                if (h < 19) return 'お疲れさまでした';
+                return '明日も頑張ろう';
+            },
+            getWeeklyStats(store) {
+                const counts = {};
+                DAYS.forEach(day => {
+                    TIME_SLOTS.forEach(slot => {
+                        if (slot.type !== 'class') return;
+                        if (day === 'Sat' && (slot.id === 'p5' || slot.id === 'p6')) return;
+                        const cell = store.getCellData(day, slot.id);
+                        if (cell) {
+                            const base = cell.subject.replace(/[αβ甲乙]/g, '').replace(/[12]/g, '');
+                            counts[base] = (counts[base] || 0) + 1;
+                        }
+                    });
+                });
+                return Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            },
+            getWeekId(d = new Date()) {
+                d.setHours(0, 0, 0, 0);
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                const yearStart = new Date(d.getFullYear(), 0, 1);
+                const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+                return `${d.getFullYear()}-W${weekNo}`;
+            }
+        };
+
+        /**
+         * 4. 状態管理
+         */
+        class Store {
+            constructor() {
+                this.state = {
+                    currentDay: new Date().getDay() >= 1 && new Date().getDay() <= 6 ? Object.keys(DAY_NAMES)[new Date().getDay() - 1] : 'Mon',
+                    memoDay: new Date().getDay() >= 1 && new Date().getDay() <= 6 ? Object.keys(DAY_NAMES)[new Date().getDay() - 1] : 'Mon',
+                    isEditMode: false,
+                    cycles: { wed: 'A', sat: 'A' },
+                    overrides: {},
+                    dailyMemos: { weekId: null, memos: {} },
+                    theme: 'system',
+                    notifyEnabled: false,
+                    notifyMinutes: 3
+                };
+                this.listeners = [];
+                this.loadFromStorage();
+            }
+            subscribe(listener) { this.listeners.push(listener); }
+            notify() { this.listeners.forEach(listener => listener(this.state)); }
+            setState(newState) {
+                this.state = { ...this.state, ...newState };
+                this.saveToStorage();
+                this.notify();
+            }
+            loadFromStorage() {
+                try {
+                    const savedCycles = localStorage.getItem('timetable_cycles');
+                    if (savedCycles) this.state.cycles = JSON.parse(savedCycles);
+                    
+                    const savedOverrides = localStorage.getItem('timetable_overrides');
+                    if (savedOverrides) this.state.overrides = JSON.parse(savedOverrides);
+                    
+                    const savedDailyMemos = localStorage.getItem('timetable_daily_memos');
+                    const currentWeekId = Utils.getWeekId();
+                    this.state.dailyMemos = (savedDailyMemos && JSON.parse(savedDailyMemos).weekId === currentWeekId)
+                        ? JSON.parse(savedDailyMemos)
+                        : { weekId: currentWeekId, memos: {} };
+
+                    const savedTheme = localStorage.getItem('timetable_theme');
+                    if (savedTheme) this.state.theme = JSON.parse(savedTheme);
+
+                    const savedNotify = localStorage.getItem('timetable_notify');
+                    if (savedNotify) this.state.notifyEnabled = JSON.parse(savedNotify);
+                } catch (e) { console.error("Failed to load from storage", e); }
+            }
+            saveToStorage() {
+                localStorage.setItem('timetable_cycles', JSON.stringify(this.state.cycles));
+                localStorage.setItem('timetable_overrides', JSON.stringify(this.state.overrides));
+                localStorage.setItem('timetable_daily_memos', JSON.stringify(this.state.dailyMemos));
+                localStorage.setItem('timetable_theme', JSON.stringify(this.state.theme));
+                localStorage.setItem('timetable_notify', JSON.stringify(this.state.notifyEnabled));
+            }
+            getCellData(day, slotId) {
+                const id = `${day}_${slotId}`;
+                if (this.state.overrides[id]) return { ...this.state.overrides[id], isOverride: true };
+                if (!MASTER_TIMETABLE[day] || !MASTER_TIMETABLE[day][slotId]) return null;
+                let data = { ...MASTER_TIMETABLE[day][slotId], isOverride: false };
+                if (data.subject === 'CYCLE_WED') data = { ...CYCLE_SUBJECTS.CYCLE_WED[this.state.cycles.wed], isCycle: true, isOverride: false };
+                else if (data.subject === 'CYCLE_SAT') data = { ...CYCLE_SUBJECTS.CYCLE_SAT[this.state.cycles.sat], isCycle: true, isOverride: false };
+                return data;
+            }
+        }
+
+        /**
+         * 5. UIレンダラー
+         */
+        class UIRenderer {
+            constructor(store) {
+                this.store = store;
+                this.appEl = document.getElementById('app');
+                this.portalEl = document.getElementById('portal-root');
+                this.store.subscribe(() => this.render());
+                this._notifiedSlots = new Set();
+                setInterval(() => { this.renderRealtimeBanner(); this.renderFloatingDock(); }, 1000);
+                setInterval(() => appController && appController.checkAndNotify(), 15000);
+            }
+            init() {
+                appController.applyTheme();
+                this.render();
+                setTimeout(() => {
+                    this.appEl.classList.remove('opacity-0');
+                    this.appEl.classList.add('animate-fade-in');
+                }, 100);
+            }
+            render() {
+                const { isEditMode, currentDay, dailyMemos, notifyEnabled } = this.store.state;
+                const currentStatus = Utils.getCurrentStatus();
+                this.appEl.innerHTML = `
+                    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 animate-slide-up" style="animation-delay: 0.1s">
+                        <div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 text-apple-gray/60 dark:text-apple-darkGray/60">${Icons.Apple}</div>
+                                <h1 class="text-[2rem] font-bold tracking-tight text-[#2c2c2e] dark:text-apple-textDark">3年C組</h1>
+                            </div>
+                            <p class="shimmer-text text-sm font-medium mt-1 ml-11">${Utils.getGreeting()}</p>
+                            <p class="text-apple-gray text-xs mt-1 flex items-center gap-2 ml-11">
+                                <span class="w-3.5 h-3.5 inline-block text-apple-blue">${Icons.Calendar}</span>
+                                <span id="current-date-display" class="tracking-wide"></span>
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <button onclick="appController.toggleEditMode()" class="tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 ${isEditMode ? 'bg-apple-accent text-white shadow-lg shadow-apple-accent/20' : 'glass-panel hover:shadow-apple-hover'}">
+                                <span class="w-4 h-4">${isEditMode ? Icons.XMark : Icons.Edit}</span>
+                                ${isEditMode ? '完了' : '編集'}
+                            </button>
+                            <button onclick="appController.copySchedule()" class="tap-effect flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium glass-panel hover:shadow-apple-hover transition-all duration-300" title="今日の時間割をコピー">
+                                <span class="w-4 h-4">${Icons.Copy}</span>
+                            </button>
+                            <button onclick="appController.toggleNotify()" class="tap-effect flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${notifyEnabled ? 'bg-apple-blue text-white shadow-md' : 'glass-panel text-apple-gray'}" title="授業通知">
+                                <span class="w-5 h-5">${notifyEnabled ? Icons.BellOn : Icons.BellOff}</span>
+                            </button>
+                            <button onclick="appController.showSettings()" class="tap-effect flex items-center justify-center w-10 h-10 rounded-full glass-panel hover:text-apple-blue transition-all duration-300">
+                                <span class="w-5 h-5">${Icons.Settings}</span>
+                            </button>
+                        </div>
+                    </header>
+                    <div id="realtime-banner-container" class="animate-slide-up" style="animation-delay: 0.2s">${this.generateRealtimeBannerHTML()}</div>
+                    <div id="remaining-today" class="animate-slide-up" style="animation-delay: 0.22s">${this.generateRemainingTodayHTML()}</div>
+                    <div id="countdown-container" class="animate-slide-up" style="animation-delay: 0.25s">${this.generateCountdownHTML()}</div>
+                    
+                    <!-- Timetable -->
+                    <div class="animate-slide-up" style="animation-delay: 0.3s">
+                        <div class="md:hidden flex gap-1.5 overflow-x-auto hide-scrollbar pb-2 bg-apple-borderLight/30 dark:bg-apple-borderDark/30 rounded-2xl p-1.5">
+                            ${DAYS.map(day => `<button onclick="appController.setDay('${day}')" class="tap-effect whitespace-nowrap flex-1 min-w-[52px] px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${currentDay === day ? 'text-apple-blue memo-tab-active' : 'text-apple-gray hover:text-apple-textLight dark:hover:text-apple-textDark'}">${DAY_NAMES[day].replace('曜日','')}</button>`).join('')}
+                        </div>
+                        <div class="hidden md:block glass-panel rounded-3xl p-6 overflow-x-auto mt-4 md:mt-0">${this.generateDesktopGridHTML(currentStatus)}</div>
+                        <div class="md:hidden flex flex-col gap-3 mt-4 md:mt-0">${this.generateMobileListHTML(currentDay, currentStatus)}</div>
+                    </div>
+                    
+                    <!-- Memo Section -->
+                    <div id="memo-container" class="animate-slide-up" style="animation-delay: 0.4s">${this.generateMemoHTML(dailyMemos, this.store.state.memoDay)}</div>
+                `;
+                this.updateDateDisplay();
+                this.renderRealtimeBanner();
+                this.renderFloatingDock();
+            }
+            updateDateDisplay() {
+                const el = document.getElementById('current-date-display');
+                if (el) el.textContent = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            }
+            renderRealtimeBanner() {
+                const container = document.getElementById('realtime-banner-container');
+                if (container) container.innerHTML = this.generateRealtimeBannerHTML();
+            }
+            generateRemainingTodayHTML() {
+                const now = new Date();
+                const dayIndex = now.getDay();
+                const dayKey = Object.keys(DAY_NAMES)[dayIndex - 1];
+                if (!dayKey || dayKey === 'Sun') return '';
+                const remaining = [];
+                TIME_SLOTS.forEach(slot => {
+                    if (slot.type !== 'class') return;
+                    if (dayKey === 'Sat' && (slot.id === 'p5' || slot.id === 'p6')) return;
+                    const end = Utils.timeStringToDate(slot.end);
+                    if (now > end) return;
+                    const cell = this.store.getCellData(dayKey, slot.id);
+                    if (!cell) return;
+                    const start = Utils.timeStringToDate(slot.start);
+                    const isCurrent = now >= start && now <= end;
+                    remaining.push({ slot, cell, isCurrent });
+                });
+                if (!remaining.length) return '';
+                const pills = remaining.map(r => {
+                    const color = Utils.getSubjectColor(r.cell.subject);
+                    const active = r.isCurrent;
+                    return `<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${ active ? 'ring-2 ring-apple-blue/40 bg-apple-blue/10 dark:bg-apple-blue/20' : 'bg-white/60 dark:bg-white/8'}" style="${active ? 'box-shadow:0 0 12px '+color+'30' : ''}"><div class="subj-dot" style="background:${color}"></div>${Utils.escapeHtml(r.cell.subject)}<span class="text-[10px] text-apple-gray font-normal">${r.slot.start}</span></div>`;
+                }).join('');
+                return `<div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">${pills}</div>`;
+            }
+            renderMemo() {
+                const container = document.getElementById('memo-container');
+                if (container) {
+                    const { dailyMemos, memoDay } = this.store.state;
+                    container.innerHTML = this.generateMemoHTML(dailyMemos, memoDay);
+                }
+            }
+            generateStatsHTML() {
+                const stats = Utils.getWeeklyStats(this.store);
+                const maxCount = stats.length ? stats[0][1] : 1;
+                let rows = stats.slice(0, 8).map(([subj, count]) => {
+                    const color = Utils.getSubjectColor(subj);
+                    return `<div class="flex items-center gap-2.5"><div class="subj-dot" style="background:${color}"></div><span class="text-xs font-medium w-14 truncate">${Utils.escapeHtml(subj)}</span><div class="flex-grow bg-apple-borderLight/30 dark:bg-apple-borderDark/30 rounded-full overflow-hidden"><div class="stat-bar" style="width:${(count/maxCount)*100}%;background:${color}20;border:1px solid ${color}40"></div></div><span class="text-xs tabular-nums text-apple-gray font-semibold w-6 text-right">${count}</span></div>`;
+                }).join('');
+                return `<div class="glass-panel rounded-3xl p-5 h-full flex flex-col"><h3 class="font-bold text-base mb-3 flex items-center gap-2"><span class="w-4.5 h-4.5 text-apple-blue">${Icons.Chart}</span>週間科目分布</h3><div class="flex flex-col gap-2 flex-grow">${rows}</div></div>`;
+            }
+            renderFloatingDock() {
+                const dock = document.getElementById('floating-dock');
+                if (!dock) return;
+                const status = Utils.getCurrentStatus();
+                const now = new Date();
+                const timeStr = Utils.formatTime(now);
+                const sec = now.getSeconds().toString().padStart(2, '0');
+
+                if (status.type === 'ongoing') {
+                    const cell = this.store.getCellData(status.dayKey, status.slot.id);
+                    const color = cell ? Utils.getSubjectColor(cell.subject) : '#86868b';
+                    const pct = status.progress;
+                    const circ = 2 * Math.PI * 15;
+                    const offset = circ * (1 - pct / 100);
+                    dock.innerHTML = `<div class="floating-dock flex items-center gap-3">
+                        <div class="dock-ring">
+                            <svg viewBox="0 0 36 36" class="w-full h-full">
+                                <circle cx="18" cy="18" r="15" stroke="${color}20" stroke-width="3"/>
+                                <circle cx="18" cy="18" r="15" stroke="${color}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center"><span class="text-[10px] font-bold tabular-nums" style="color:${color}">${status.remainingMinutes}</span></div>
+                        </div>
+                        <div class="flex flex-col min-w-0 flex-grow">
+                            <div class="flex items-center gap-2">
+                                <div class="subj-dot" style="background:${color}"></div>
+                                <span class="text-sm font-bold truncate">${cell ? Utils.escapeHtml(cell.subject) : ''}</span>
+                                <span class="text-[11px] text-apple-gray truncate">${cell ? Utils.escapeHtml(cell.teacher) : ''}</span>
+                            </div>
+                            <div class="w-full bg-black/5 dark:bg-white/10 rounded-full mt-1.5 overflow-hidden" style="height:3px"><div class="dock-progress" style="width:${pct}%;background:${color}"></div></div>
+                        </div>
+                        <div class="flex flex-col items-end flex-shrink-0 pl-2">
+                            <span class="font-mono text-base font-bold tabular-nums">${timeStr}</span>
+                            <span class="font-mono text-[10px] text-apple-gray tabular-nums dock-pulse">${sec}</span>
+                        </div>
+                    </div>`;
+                } else if (status.type === 'break') {
+                    const cell = this.store.getCellData(status.dayKey, status.nextSlot.id);
+                    const color = cell ? Utils.getSubjectColor(cell.subject) : '#34c759';
+                    dock.innerHTML = `<div class="floating-dock flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background:${color}15"><span class="w-4 h-4" style="color:${color}">${Icons.ArrowRight}</span></div>
+                        <div class="flex flex-col min-w-0 flex-grow">
+                            <span class="text-xs text-apple-gray">次の授業まで</span>
+                            <span class="text-sm font-bold truncate">${cell ? Utils.escapeHtml(cell.subject) : status.nextSlot.name} <span class="font-normal text-apple-gray">${status.nextSlot.start}〜</span></span>
+                        </div>
+                        <div class="flex items-baseline gap-1 flex-shrink-0 pl-2">
+                            <span class="text-2xl font-bold tabular-nums" style="color:${color}">${status.minutesToNext}</span>
+                            <span class="text-xs text-apple-gray">分</span>
+                        </div>
+                    </div>`;
+                } else {
+                    dock.innerHTML = `<div class="floating-dock flex items-center justify-between">
+                        <div class="flex items-center gap-2.5"><span class="w-4 h-4 text-apple-gray">${Icons.Clock}</span><span class="font-mono text-base font-bold tabular-nums">${timeStr}<span class="text-xs text-apple-gray ml-1">${sec}</span></span></div>
+                        <span class="text-xs text-apple-gray">本日の授業は終了しました</span>
+                    </div>`;
+                }
+            }
+            generateRealtimeBannerHTML() {
+                const status = Utils.getCurrentStatus();
+                if (status.type === 'ongoing') {
+                    const cell = this.store.getCellData(status.dayKey, status.slot.id);
+                    if (!cell) return '';
+                    return `
+                        <div class="glass-panel rounded-2xl p-4 md:p-6 flex items-center gap-4 md:gap-6 border-l-4 border-l-apple-blue">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue relative">
+                                <span class="w-6 h-6">${Icons.Clock}</span>
+                                <div class="absolute inset-0 rounded-full border-2 border-apple-blue animate-ping opacity-20"></div>
+                            </div>
+                            <div class="flex-grow w-full">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex items-center gap-3">
+                                            <p class="text-sm text-apple-blue font-semibold tracking-wider uppercase">${status.slot.name} 進行中</p>
+                                            <span class="font-mono text-sm tabular-nums text-apple-gray">${Utils.formatTime(new Date())}</span>
+                                        </div>
+                                        <h2 class="text-2xl font-bold mt-1">${Utils.escapeHtml(cell.subject)}</h2>
+                                        <p class="text-apple-gray text-sm">${Utils.escapeHtml(cell.teacher)}</p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0 pl-4">
+                                        <p class="text-sm text-apple-gray">残り</p>
+                                        <p class="text-xl font-bold tabular-nums text-apple-blue">${status.remainingMinutes}<span class="text-sm font-normal text-apple-gray ml-1">分</span></p>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-apple-borderLight dark:bg-apple-borderDark rounded-full h-2.5 overflow-hidden mt-3">
+                                    <div class="progress-bar-striped animate-progress-stripes bg-apple-blue h-2.5 rounded-full" style="width: ${status.progress}%; transition: width 1s linear;"></div>
+                                </div>
+                            </div>
+                        </div>`;
+                } else if (status.type === 'break') {
+                    const cell = this.store.getCellData(status.dayKey, status.nextSlot.id);
+                    return `
+                        <div class="glass-panel rounded-2xl p-4 flex items-center gap-4 border-l-4 border-l-apple-success">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-apple-success/10 flex items-center justify-center text-apple-success"><span class="w-5 h-5">${Icons.ArrowRight}</span></div>
+                            <div class="flex-grow">
+                                <p class="text-sm text-apple-success font-semibold">まもなく開始 (${status.nextSlot.start})</p>
+                                <p class="text-lg font-bold">次は ${cell ? Utils.escapeHtml(cell.subject) : status.nextSlot.name}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold tabular-nums text-apple-success">${status.minutesToNext}<span class="text-sm font-normal text-apple-gray ml-1">分前</span></p>
+                            </div>
+                        </div>`;
+                } else {
+                    return `<div class="glass-panel rounded-2xl p-4 flex items-center justify-center text-apple-gray"><p class="font-medium">${status.title}</p></div>`;
+                }
+            }
+            generateCountdownHTML() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const currentYear = today.getFullYear();
+
+                let html = '<div class="glass-panel rounded-2xl p-5"><div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">';
+                COUNTDOWN_EVENTS.forEach(event => {
+                    const [month, day] = event.date.split('/').map(Number);
+                    let eventDate = new Date(currentYear, month - 1, day);
+                    
+                    if (today.getMonth() > month -1) {
+                        eventDate.setFullYear(currentYear + 1);
+                    }
+
+                    const diffTime = eventDate.getTime() - today.getTime();
+
+                    if (diffTime < 0) {
+                        html += `
+                            <div class="countdown-item text-center p-3 rounded-2xl bg-white dark:bg-white/10 opacity-50">
+                                <p class="text-xl font-bold text-apple-gray">終了</p>
+                                <p class="text-[11px] text-apple-gray mt-1.5 leading-tight">${Utils.escapeHtml(event.name)}</p>
+                            </div>
+                        `;
+                    } else {
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        const urgency = diffDays <= 7 ? 'text-apple-accent' : diffDays <= 30 ? 'text-apple-warning' : 'text-apple-blue';
+                        html += `
+                            <div class="countdown-item text-center p-3 rounded-2xl bg-white dark:bg-white/10">
+                                <p class="text-2xl font-bold tabular-nums ${urgency}">${diffDays}<span class="text-xs font-medium text-apple-gray ml-0.5">日</span></p>
+                                <p class="text-[11px] text-apple-gray mt-1.5 leading-tight">${Utils.escapeHtml(event.name)}</p>
+                            </div>
+                        `;
+                    }
+                });
+                html += '</div></div>';
+                return html;
+            }
+            generateMemoHTML(dailyMemos, currentDay) {
+                let tabsHtml = '<div class="flex border-b border-apple-borderLight dark:border-apple-borderDark -mx-5 px-3 mb-3 overflow-x-auto hide-scrollbar">';
+                DAYS.forEach(day => {
+                    const isActive = day === currentDay;
+                    tabsHtml += `
+                        <button onclick="appController.setMemoDay('${day}')" class="tap-effect flex-shrink-0 whitespace-nowrap px-4 py-2.5 font-semibold text-sm transition-all duration-300 ${isActive ? 'text-apple-blue memo-tab-active' : 'text-apple-gray hover:text-apple-textLight dark:hover:text-apple-textDark'}">
+                            ${DAY_NAMES[day].replace('曜日','')}
+                        </button>
+                    `;
+                });
+                tabsHtml += '</div>';
+                const memoContent = dailyMemos.memos[currentDay] || '';
+                return `
+                    <div class="glass-panel rounded-3xl p-5 h-full flex flex-col min-h-[220px]">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2.5"><span class="w-5 h-5 text-apple-blue">${Icons.Pencil}</span>デイリーメモ</h3>
+                        ${tabsHtml}
+                        <textarea id="daily-memo-textarea" oninput="appController.updateMemo('${currentDay}', this.value)" class="w-full flex-grow bg-transparent dark:bg-transparent rounded-xl p-3 text-[15px] leading-relaxed resize-none focus:outline-none transition-shadow duration-200 placeholder:text-apple-gray/40" placeholder="${DAY_NAMES[currentDay]}のメモ...">${Utils.escapeHtml(memoContent)}</textarea>
+                    </div>
+                `;
+            }
+            generateCellHTML(day, slot, currentStatus) {
+                const cellData = this.store.getCellData(day, slot.id);
+                const { isEditMode } = this.store.state;
+                if (!cellData && !isEditMode) return `<div class="p-3"></div>`;
+                const content = cellData || { subject: 'なし', teacher: '-' };
+                const isCurrent = currentStatus && currentStatus.type === 'ongoing' && currentStatus.dayKey === day && currentStatus.slot.id === slot.id;
+                
+                let baseClasses = "relative rounded-2xl p-3 flex flex-col justify-center min-h-[80px] cell-hover";
+                let bgClass = "bg-white/40 dark:bg-white/[0.04]";
+                let borderClass = `border border-apple-borderLight/60 dark:border-apple-borderDark/60`;
+                let highlightClass = '';
+
+                if (isCurrent) {
+                    bgClass = 'bg-apple-blue/10 dark:bg-apple-blue/15';
+                    borderClass = 'border-apple-blue/60';
+                    highlightClass = 'shadow-apple-glow animate-refined-pulse';
+                } else if (content.isOverride) {
+                    bgClass = 'bg-amber-50 dark:bg-amber-400/10';
+                    borderClass = 'border-amber-400/40 shadow-sm';
+                } else if (content.isCycle) {
+                    bgClass = 'bg-indigo-50/50 dark:bg-apple-blue/[0.08]';
+                    borderClass = 'border-indigo-200/40 dark:border-apple-blue/20';
+                }
+
+                const editClasses = isEditMode ? 'cursor-pointer hover:scale-[1.03] hover:shadow-apple-hover border-dashed border-2 border-apple-blue/40 bg-apple-blue/5' : borderClass;
+                return `
+                    <div class="${baseClasses} ${bgClass} ${editClasses} ${highlightClass}" ${isEditMode ? `onclick="appController.openEditModal('${day}', '${slot.id}')"` : ''}>
+                        ${content.isOverride ? `<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]"></span>` : ''}
+                        <div class="flex items-center gap-1.5 mb-1"><div class="subj-dot" style="background:${Utils.getSubjectColor(content.subject)}"></div><h3 class="font-semibold text-[15px] leading-tight ${content.isOverride ? 'text-amber-700 dark:text-amber-400' : ''}">${Utils.escapeHtml(content.subject)}</h3></div>
+                        <p class="text-xs text-apple-gray leading-tight pl-[14px]">${Utils.escapeHtml(content.teacher)}</p>
+                        ${isEditMode ? `<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-white/50 dark:bg-black/50 rounded-2xl backdrop-blur-sm transition-opacity"><span class="w-6 h-6 text-apple-blue">${Icons.Edit}</span></div>` : ''}
+                    </div>
+                `;
+            }
+            generateDesktopGridHTML(currentStatus) {
+                let html = '<div class="timetable-grid min-w-[800px]">';
+                const weekDates = Utils.getWeekDates();
+                html += `<div class="pb-4 font-medium text-apple-gray text-center border-b border-apple-borderLight dark:border-apple-borderDark flex items-end justify-center"><span class="w-4 h-4 mb-1">${Icons.Clock}</span></div>`;
+                DAYS.forEach(day => { html += `<div class="pb-4 font-bold text-center border-b border-apple-borderLight dark:border-apple-borderDark">${DAY_NAMES[day]} <span class="font-normal text-sm text-apple-gray">(${weekDates[day]})</span></div>`; });
+                TIME_SLOTS.forEach(slot => {
+                    html += `<div class="py-4 pr-4 flex flex-col justify-center items-end text-right border-r border-apple-borderLight dark:border-apple-borderDark"><span class="text-sm font-bold">${slot.name}</span><span class="text-[11px] text-apple-gray">${slot.start} - ${slot.end}</span></div>`;
+                    DAYS.forEach(day => {
+                        if (slot.type === 'break' && day === 'Mon') html += `<div class="col-span-6 py-3 flex items-center justify-center gap-3 text-apple-gray/70 dark:text-apple-darkGray/70 text-xs font-medium tracking-[0.2em] uppercase mx-2 my-1"><span class="h-px flex-grow bg-apple-borderLight dark:bg-apple-borderDark"></span>Lunch Break<span class="h-px flex-grow bg-apple-borderLight dark:bg-apple-borderDark"></span></div>`;
+                        else if (slot.type === 'break') {} 
+                        else if (day === 'Sat' && (slot.id === 'p5' || slot.id === 'p6' || slot.type === 'afterschool')) html += `<div class="p-3"></div>`;
+                        else if (slot.type === 'afterschool' && day === 'Mon') html += `<div class="col-span-6 py-3 flex items-center justify-center text-apple-gray text-sm bg-apple-borderLight/10 dark:bg-apple-borderDark/10 rounded-lg mx-2 my-1">最終下校 18:30</div>`;
+                        else if (slot.type === 'afterschool') {} 
+                        else html += `<div class="py-2 pl-2">${this.generateCellHTML(day, slot, currentStatus)}</div>`;
+                    });
+                });
+                html += '</div>';
+                return html;
+            }
+            generateMobileListHTML(day, currentStatus) {
+                let html = '';
+                TIME_SLOTS.forEach(slot => {
+                    if ((day === 'Sat' && (slot.id === 'p5' || slot.id === 'p6'))) return;
+                    if (!this.store.getCellData(day, slot.id) && !this.store.state.isEditMode && !['break', 'afterschool'].includes(slot.type)) return;
+
+                    if (slot.type === 'break') html += `<div class="glass-panel rounded-xl py-3 text-center text-apple-gray text-sm font-medium my-2 flex items-center justify-center gap-2"><span class="w-4 h-4">${Icons.Book}</span> LUNCH BREAK</div>`;
+                    else if (slot.type === 'afterschool') html += `<div class="text-center text-apple-gray text-xs mt-4 mb-2">最終下校 18:30</div>`;
+                    else html += `<div class="flex gap-3 items-stretch"><div class="flex flex-col justify-center items-center w-16 flex-shrink-0 text-apple-gray"><span class="text-xs font-bold">${slot.name}</span><span class="text-[10px] opacity-70">${slot.start}</span></div><div class="flex-grow">${this.generateCellHTML(day, slot, currentStatus)}</div></div>`;
+                });
+                return html;
+            }
+            renderSettingsModal() { 
+                const { cycles, theme } = this.store.state;
+                const themeUI = `
+                    <div>
+                        <h3 class="text-sm font-semibold text-apple-gray uppercase tracking-wider mb-3">外観モード</h3>
+                        <div class="flex bg-apple-borderLight dark:bg-apple-borderDark rounded-xl p-1">
+                            <button onclick="appController.setTheme('light')" class="flex-1 py-2 text-sm font-medium text-center rounded-lg flex items-center justify-center gap-2 ${theme === 'light' ? 'bg-white dark:bg-apple-cardDark text-apple-textLight dark:text-white shadow-sm' : 'text-apple-gray'} transition-all">
+                                <span class="w-5 h-5">${Icons.Sun}</span> ライト
+                            </button>
+                            <button onclick="appController.setTheme('system')" class="flex-1 py-2 text-sm font-medium text-center rounded-lg flex items-center justify-center gap-2 ${theme === 'system' ? 'bg-white dark:bg-apple-cardDark text-apple-textLight dark:text-white shadow-sm' : 'text-apple-gray'} transition-all">
+                                <span class="w-5 h-5">${Icons.Desktop}</span> システム
+                            </button>
+                            <button onclick="appController.setTheme('dark')" class="flex-1 py-2 text-sm font-medium text-center rounded-lg flex items-center justify-center gap-2 ${theme === 'dark' ? 'bg-white dark:bg-apple-cardDark text-apple-textLight dark:text-white shadow-sm' : 'text-apple-gray'} transition-all">
+                                <span class="w-5 h-5">${Icons.Moon}</span> ダーク
+                            </button>
+                        </div>
+                    </div>`;
+                
+                const html = `<div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300"><div class="absolute inset-0 modal-backdrop" onclick="appController.closeModal('settings-modal')"></div><div class="relative w-full max-w-md bg-apple-bg dark:bg-apple-darkBg rounded-[2rem] shadow-apple-dark overflow-hidden transform scale-95 transition-transform duration-300"><div class="p-6 border-b border-apple-borderLight dark:border-apple-borderDark flex justify-between items-center"><h2 class="text-xl font-bold flex items-center gap-2"><span class="w-5 h-5 text-apple-blue">${Icons.Settings}</span> 設定</h2><button onclick="appController.closeModal('settings-modal')" class="w-8 h-8 rounded-full bg-apple-borderLight dark:bg-apple-borderDark flex items-center justify-center text-apple-gray hover:text-apple-textLight dark:hover:text-white transition-colors"><span class="w-5 h-5">${Icons.XMark}</span></button></div><div class="p-6 space-y-6">${themeUI}<div><h3 class="text-sm font-semibold text-apple-gray uppercase tracking-wider mb-3">周期授業の設定 (今週)</h3><div class="space-y-3"><div class="glass-panel rounded-2xl p-4"><p class="text-sm font-medium mb-2">水曜 3-4限 (サイエンス/技術)</p><div class="flex bg-apple-borderLight dark:bg-apple-borderDark rounded-lg p-1 relative"><div class="absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-apple-cardDark rounded-md shadow-sm transition-transform duration-300 ease-in-out" style="transform: translateX(${cycles.wed === 'A' ? '4px' : 'calc(100% + 4px)'})"></div><button onclick="appController.setCycle('wed', 'A')" class="relative z-10 flex-1 py-1.5 text-sm font-medium text-center ${cycles.wed === 'A' ? '' : 'text-apple-gray'} transition-colors">サイエンス</button><button onclick="appController.setCycle('wed', 'B')" class="relative z-10 flex-1 py-1.5 text-sm font-medium text-center ${cycles.wed === 'B' ? '' : 'text-apple-gray'} transition-colors">技術</button></div></div><div class="glass-panel rounded-2xl p-4"><p class="text-sm font-medium mb-2">土曜 3-4限 (GC/IT)</p><div class="flex bg-apple-borderLight dark:bg-apple-borderDark rounded-lg p-1 relative"><div class="absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-apple-cardDark rounded-md shadow-sm transition-transform duration-300 ease-in-out" style="transform: translateX(${cycles.sat === 'A' ? '4px' : 'calc(100% + 4px)'})"></div><button onclick="appController.setCycle('sat', 'A')" class="relative z-10 flex-1 py-1.5 text-sm font-medium text-center ${cycles.sat === 'A' ? '' : 'text-apple-gray'} transition-colors">GC</button><button onclick="appController.setCycle('sat', 'B')" class="relative z-10 flex-1 py-1.5 text-sm font-medium text-center ${cycles.sat === 'B' ? '' : 'text-apple-gray'} transition-colors">IT</button></div></div></div></div><div><h3 class="text-sm font-semibold text-apple-gray uppercase tracking-wider mb-3">データ管理</h3><button onclick="appController.resetAllOverrides()" class="w-full tap-effect flex items-center justify-center gap-2 p-4 rounded-2xl border border-apple-accent/30 text-apple-accent bg-apple-accent/5 hover:bg-apple-accent/10 transition-colors font-medium"><span class="w-5 h-5">${Icons.Reset}</span>時間割変更をリセット</button></div></div></div></div>`;
+                this.portalEl.innerHTML = html;
+                setTimeout(() => { const modal = document.getElementById('settings-modal'); modal.classList.remove('opacity-0'); modal.querySelector('.transform').classList.remove('scale-95'); }, 10);
+            }
+            renderEditModal(day, slotId) { /* unchanged */ }
+            showToast(message, type = 'success') { /* unchanged */ }
+            closeModal(id) { /* unchanged */ }
+        }
+
+        /**
+         * 6. コントローラー
+         */
+        class AppController {
+            constructor(store, renderer) { this.store = store; this.renderer = renderer; }
+            setDay(day) { this.store.setState({ currentDay: day, memoDay: day }); }
+            setMemoDay(day) {
+                this.store.state.memoDay = day;
+                this.store.saveToStorage();
+                this.renderer.renderMemo();
+            }
+            toggleEditMode() {
+                const isEdit = this.store.state.isEditMode;
+                this.store.setState({ isEditMode: !isEdit });
+                if (!isEdit) this.renderer.showToast('編集モードを開始しました', 'info');
+            }
+            toggleNotify() {
+                const enabled = !this.store.state.notifyEnabled;
+                if (enabled && 'Notification' in window) {
+                    Notification.requestPermission().then(perm => {
+                        if (perm === 'granted') {
+                            this.store.setState({ notifyEnabled: true });
+                            this.renderer.showToast('\u6388\u696d\u958b\u59cb3\u5206\u524d\u306b\u901a\u77e5\u3057\u307e\u3059');
+                        } else {
+                            this.renderer.showToast('\u901a\u77e5\u304c\u30d6\u30ed\u30c3\u30af\u3055\u308c\u3066\u3044\u307e\u3059', 'info');
+                        }
+                    });
+                } else {
+                    this.store.setState({ notifyEnabled: false });
+                    this.renderer.showToast('\u901a\u77e5\u3092\u30aa\u30d5\u306b\u3057\u307e\u3057\u305f');
+                }
+            }
+            checkAndNotify() {
+                if (!this.store.state.notifyEnabled) return;
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                const now = new Date();
+                const dayIndex = now.getDay();
+                const dayKey = Object.keys(DAY_NAMES)[dayIndex - 1];
+                if (!dayKey || dayKey === 'Sun') return;
+                const lead = this.store.state.notifyMinutes;
+                TIME_SLOTS.forEach(slot => {
+                    if (slot.type !== 'class' && slot.type !== 'homeroom') return;
+                    if (dayKey === 'Sat' && (slot.id === 'p5' || slot.id === 'p6')) return;
+                    const start = Utils.timeStringToDate(slot.start);
+                    const diff = (start - now) / 60000;
+                    const key = `${dayKey}_${slot.id}_${now.toDateString()}`;
+                    if (diff > 0 && diff <= lead && !this.renderer._notifiedSlots.has(key)) {
+                        this.renderer._notifiedSlots.add(key);
+                        const cell = this.store.getCellData(dayKey, slot.id);
+                        if (cell) {
+                            new Notification(`${slot.name}: ${cell.subject}`, {
+                                body: `${cell.teacher} \u2022 ${slot.start}\u958b\u59cb`,
+                                icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>\uD83D\uDD14</text></svg>',
+                                tag: key,
+                                requireInteraction: false
+                            });
+                        }
+                    }
+                });
+            }
+            showSettings() { this.renderer.renderSettingsModal(); }
+            closeModal(id) { this.renderer.closeModal(id); }
+            setCycle(type, value) {
+                this.store.setState({ cycles: { ...this.store.state.cycles, [type]: value } });
+                this.renderer.renderSettingsModal();
+            }
+            setTheme(theme) {
+                this.store.setState({ theme });
+                this.applyTheme();
+                this.renderer.renderSettingsModal();
+            }
+            applyTheme() {
+                const theme = this.store.state.theme;
+                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+            openEditModal(day, slotId) { if (this.store.state.isEditMode) this.renderer.renderEditModal(day, slotId); }
+            saveOverride(e, day, slotId) {
+                e.preventDefault();
+                const subject = document.getElementById('edit-subject').value.trim();
+                const teacher = document.getElementById('edit-teacher').value.trim();
+                const overrides = { ...this.store.state.overrides, [`${day}_${slotId}`]: { subject, teacher } };
+                this.store.setState({ overrides });
+                this.closeModal('edit-modal');
+                this.renderer.showToast('時間割を変更しました');
+            }
+            deleteOverride(day, slotId) {
+                const overrides = { ...this.store.state.overrides };
+                delete overrides[`${day}_${slotId}`];
+                this.store.setState({ overrides });
+                this.closeModal('edit-modal');
+                this.renderer.showToast('元の時間割に戻しました');
+            }
+            copySchedule() {
+                const dayKey = this.store.state.currentDay;
+                const dayName = DAY_NAMES[dayKey];
+                let text = `${dayName}\n`;
+                TIME_SLOTS.forEach(slot => {
+                    if (slot.type !== 'class' && slot.type !== 'homeroom') return;
+                    if (dayKey === 'Sat' && (slot.id === 'p5' || slot.id === 'p6')) return;
+                    const cell = this.store.getCellData(dayKey, slot.id);
+                    if (cell) text += `${slot.name}: ${cell.subject} (${cell.teacher})\n`;
+                });
+                navigator.clipboard.writeText(text.trim()).then(() => {
+                    this.renderer.showToast('\u6642\u9593\u5272\u3092\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f');
+                }).catch(() => {
+                    this.renderer.showToast('\u30b3\u30d4\u30fc\u306b\u5931\u6557\u3057\u307e\u3057\u305f', 'error');
+                });
+            }
+            resetAllOverrides() {
+                if(confirm('今週の一時的な変更をすべてリセットしますか？')) {
+                    this.store.setState({ overrides: {}, isEditMode: false });
+                    this.closeModal('settings-modal');
+                    this.renderer.showToast('すべての変更をリセットしました');
+                }
+            }
+            updateMemo(day, content) {
+                this.store.state.dailyMemos = {
+                    ...this.store.state.dailyMemos,
+                    memos: { ...this.store.state.dailyMemos.memos, [day]: content }
+                };
+                this.store.saveToStorage();
+            }
+        }
+        
+        let appController;
+        document.addEventListener('DOMContentLoaded', () => {
+            UIRenderer.prototype.renderEditModal = function(day, slotId) {
+                const slot = TIME_SLOTS.find(s => s.id === slotId);
+                const currentData = this.store.getCellData(day, slotId) || { subject: '', teacher: '' };
+                let originalSubjectName = (MASTER_TIMETABLE[day]?.[slotId]?.subject || 'なし').replace('CYCLE_WED', 'サイエンス/技術(周期)').replace('CYCLE_SAT', 'GC/IT(周期)');
+                const html = `<div id="edit-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 transition-opacity duration-300"><div class="absolute inset-0 modal-backdrop" onclick="appController.closeModal('edit-modal')"></div><div class="relative w-full sm:max-w-md bg-apple-bg dark:bg-apple-darkBg rounded-t-[2rem] sm:rounded-[2rem] shadow-apple-dark overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-all duration-300 pb-safe"><div class="w-full flex justify-center pt-3 sm:hidden absolute top-0"><div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div></div><div class="p-6 pt-10 sm:pt-6 border-b border-apple-borderLight dark:border-apple-borderDark"><p class="text-apple-blue font-medium text-sm mb-1">${DAY_NAMES[day]} - ${slot.name}</p><h2 class="text-2xl font-bold">時間割の変更</h2></div><form onsubmit="appController.saveOverride(event, '${day}', '${slotId}')" class="p-6 space-y-5"><div><label class="block text-sm font-medium text-apple-gray mb-2">科目名</label><input type="text" id="edit-subject" value="${Utils.escapeHtml(currentData.subject)}" required class="w-full bg-white dark:bg-black border border-apple-borderLight dark:border-apple-borderDark rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-apple-blue transition-all" placeholder="例：自習、テストなど"></div><div><label class="block text-sm font-medium text-apple-gray mb-2">担当教員</label><input type="text" id="edit-teacher" value="${Utils.escapeHtml(currentData.teacher)}" class="w-full bg-white dark:bg-black border border-apple-borderLight dark:border-apple-borderDark rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-apple-blue transition-all" placeholder="未定・なしの場合は空欄"></div><div class="bg-apple-borderLight/30 dark:bg-apple-borderDark/30 rounded-xl p-4 text-sm text-apple-gray mt-4"><p>元の設定: <span class="font-medium">${Utils.escapeHtml(originalSubjectName)}</span></p></div><div class="flex gap-3 pt-4">${currentData.isOverride ? `<button type="button" onclick="appController.deleteOverride('${day}', '${slotId}')" class="tap-effect flex-1 py-3.5 rounded-xl font-medium text-apple-accent bg-apple-accent/10">元に戻す</button>` : `<button type="button" onclick="appController.closeModal('edit-modal')" class="tap-effect flex-1 py-3.5 rounded-xl font-medium bg-apple-borderLight dark:bg-apple-borderDark">キャンセル</button>`}<button type="submit" class="tap-effect flex-[2] py-3.5 rounded-xl font-bold text-white bg-apple-blue shadow-md hover:bg-apple-blueHover">変更を保存</button></div></form></div></div>`;
+                this.portalEl.innerHTML = html;
+                setTimeout(() => { const modal = document.getElementById('edit-modal'); modal.classList.remove('opacity-0'); const inner = modal.querySelector('.transform'); inner.classList.remove('translate-y-full', 'sm:scale-95'); }, 10);
+                setTimeout(() => { document.getElementById('edit-subject').focus(); }, 300);
+            };
+            UIRenderer.prototype.showToast = function(message, type = 'success') {
+                const toastId = 'toast-' + Date.now();
+                const html = `<div id="${toastId}" class="fixed bottom-safe sm:bottom-10 left-1/2 transform -translate-x-1/2 flex items-center gap-3 px-6 py-3 rounded-full shadow-apple-dark ${type === 'success' ? 'bg-apple-success' : 'bg-apple-blue'} text-white font-medium z-[100] translate-y-20 opacity-0 transition-all duration-400 ease-out"><span class="w-5 h-5">${type === 'success' ? Icons.Check : Icons.Settings}</span>${Utils.escapeHtml(message)}</div>`;
+                this.portalEl.insertAdjacentHTML('beforeend', html);
+                const el = document.getElementById(toastId);
+                setTimeout(() => el.classList.remove('translate-y-20', 'opacity-0'), 10);
+                setTimeout(() => { el.classList.add('opacity-0', 'scale-95'); setTimeout(() => el.remove(), 300); }, 3000);
+            };
+            UIRenderer.prototype.closeModal = function(id) {
+                const modal = document.getElementById(id);
+                if (modal) {
+                    modal.classList.add('opacity-0');
+                    const inner = modal.querySelector('.transform');
+                    if(inner) {
+                        if (inner.classList.contains('sm:scale-95')) inner.classList.add('translate-y-full', 'sm:scale-95');
+                        else inner.classList.add('scale-95');
+                    }
+                    setTimeout(() => modal.remove(), 300);
+                }
+            };
+            
+            const store = new Store();
+            const renderer = new UIRenderer(store);
+            appController = new AppController(store, renderer);
+            renderer.init();
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (store.state.theme === 'system') {
+                    appController.applyTheme();
+                }
+            });
+
+            const style = document.createElement('style');
+            style.innerHTML = `.pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); } .bottom-safe { bottom: env(safe-area-inset-bottom, 20px); }`;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
