@@ -285,8 +285,12 @@
                 return date;
             },
             formatTime(date) { return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`; },
+            escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            },
             getCurrentStatus() {
-                const now = new Date();
+                const now = new Date(Date.now() + 1000);
                 const dayIndex = now.getDay();
                 const dayKey = Object.keys(DAY_NAMES)[dayIndex - 1] || (dayIndex === 0 ? 'Sun' : 'Sat');
                 if (dayKey === 'Sun' || (dayKey === 'Sat' && now > this.timeStringToDate('12:35'))) return { type: 'holiday', title: '本日の授業は終了しました', current: null, next: null };
@@ -296,19 +300,19 @@
                     const end = this.timeStringToDate(slot.end);
                     if (now >= start && now <= end) {
                         const progress = ((now - start) / (end - start)) * 100;
-                        const remainingMinutes = Math.ceil((end - now) / 60000);
-                        return { type: 'ongoing', slot, progress, remainingMinutes, dayKey };
+                        const remainingMs = end - now;
+                        const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+                        const remainingMinutes = Math.ceil(remainingMs / 60000);
+                        return { type: 'ongoing', slot, progress, remainingMinutes, remainingSeconds, dayKey };
                     }
                     if (now < start) {
-                        const minutesToNext = Math.ceil((start - now) / 60000);
-                        return { type: 'break', nextSlot: slot, minutesToNext, dayKey };
+                        const diffMs = start - now;
+                        const secondsToNext = Math.max(0, Math.floor(diffMs / 1000));
+                        const minutesToNext = Math.ceil(diffMs / 60000);
+                        return { type: 'break', nextSlot: slot, minutesToNext, secondsToNext, dayKey };
                     }
                 }
                 return { type: 'afterschool', title: '最終下校時刻を過ぎています', current: null, next: null };
-            },
-            escapeHtml(str) {
-                if (typeof str !== 'string') return str;
-                return str.replace(/[&<>"']/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[tag]));
             },
             getWeekDates() {
                 const today = new Date();
@@ -331,14 +335,90 @@
                 return SUBJECT_COLORS['default'];
             },
             getGreeting() {
-                const h = new Date().getHours();
-                if (h < 7) return 'おはようございます';
-                if (h < 10) return 'おはようございます';
-                if (h < 12) return '午前の授業、頑張ろう';
-                if (h < 14) return 'お昼休みを楽しもう';
-                if (h < 16) return '午後もあと少し！';
-                if (h < 19) return 'お疲れさまでした';
-                return '明日も頑張ろう';
+                const now = new Date();
+                const h = now.getHours();
+                const dow = now.getDay();
+                const pick = arr => arr[Math.floor((now.getMinutes() / 60) * arr.length)];
+                const isFri = dow === 5, isSat = dow === 6, isMon = dow === 1;
+
+                if (h < 6) return pick([
+                    'まだ早いよ、もう少し寝よう',
+                    '早起きだね、すごい',
+                    'こんな時間に…体調大丈夫？',
+                    '静かな朝、いい時間だね'
+                ]);
+                if (h < 8) {
+                    const base = [
+                        'おはよう、今日もいい一日に',
+                        'おはようございます ☀',
+                        '朝の空気が気持ちいいね',
+                        '今日も一日、頑張ろう',
+                        'いい朝だね、準備はOK？',
+                        'さあ、今日が始まるよ'
+                    ];
+                    if (isMon) base.push('月曜日、新しい一週間の始まり', '週の始まり、ペースを掴もう');
+                    if (isFri) base.push('金曜日！あと1日頑張ろう');
+                    if (isSat) base.push('土曜日、午前だけ頑張ろう');
+                    return pick(base);
+                }
+                if (h < 10) return pick([
+                    '1限スタート、集中していこう',
+                    '午前の授業、いい感じに',
+                    '今日の調子はどう？',
+                    '朝イチから全力で',
+                    '頭がさえてるうちに集中！'
+                ]);
+                if (h < 12) return pick([
+                    'お昼まであと少し！',
+                    '午前中ラストスパート',
+                    '集中力を切らさずに',
+                    'いいペースで進んでるね',
+                    'もうひと頑張り、お昼が待ってる'
+                ]);
+                if (h < 13) return pick([
+                    'お昼休み、ゆっくり食べよう',
+                    'ランチタイム！リフレッシュ',
+                    '午後に備えてしっかり休憩',
+                    '美味しいご飯でエネルギー補給',
+                    'いい休憩は午後の集中力に繋がる'
+                ]);
+                if (h < 15) return pick([
+                    '午後の授業、もうひと踏ん張り',
+                    '午後もいい調子で',
+                    'あと少しで今日の授業終わり',
+                    '眠気に負けるな！',
+                    '残りの時間を大切に',
+                    isFri ? '今週ラストスパート！' : '午後も集中していこう'
+                ]);
+                if (h < 16) return pick([
+                    'もうすぐ放課後だね',
+                    '最後の授業、全力で！',
+                    'あともう少し、頑張れ',
+                    '今日の授業もそろそろ終わり',
+                    isFri ? '週末まであと少し！' : 'ラスト一踏ん張り'
+                ]);
+                if (h < 18) return pick([
+                    'お疲れさま、いい一日だった？',
+                    '放課後タイム、自由に使おう',
+                    '今日の授業お疲れさま',
+                    '部活や自習、有意義に',
+                    isFri ? '一週間お疲れさま！' : 'いい放課後を過ごそう'
+                ]);
+                if (h < 21) return pick([
+                    'ゆっくり休んでね',
+                    '今日も一日お疲れさま',
+                    '宿題は終わった？',
+                    '明日の準備はできてる？',
+                    isFri ? '週末を楽しんで！' : 'いい夜を過ごしてね',
+                    isSat ? '明日は休み、ゆっくりね' : '復習の時間にしよう'
+                ]);
+                return pick([
+                    'もう遅いよ、そろそろ寝よう',
+                    '明日に備えて早めに休もう',
+                    'おやすみなさい、良い夢を',
+                    '夜更かしは程々にね',
+                    '今日も頑張った、ゆっくり休んで'
+                ]);
             },
             getWeeklyStats(store) {
                 const counts = {};
@@ -571,7 +651,7 @@
                                 <circle cx="18" cy="18" r="15" stroke="${color}20" stroke-width="3"/>
                                 <circle cx="18" cy="18" r="15" stroke="${color}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/>
                             </svg>
-                            <div class="absolute inset-0 flex items-center justify-center"><span class="text-[10px] font-bold tabular-nums" style="color:${color}">${status.remainingMinutes}</span></div>
+                            <div class="absolute inset-0 flex items-center justify-center"><span class="text-[10px] font-bold tabular-nums" style="color:${color}">${status.remainingSeconds < 60 ? status.remainingSeconds + 's' : status.remainingMinutes}</span></div>
                         </div>
                         <div class="flex flex-col min-w-0 flex-grow">
                             <div class="flex items-center gap-2">
@@ -596,8 +676,8 @@
                             <span class="text-sm font-bold truncate">${cell ? Utils.escapeHtml(cell.subject) : status.nextSlot.name} <span class="font-normal text-apple-gray">${status.nextSlot.start}〜</span></span>
                         </div>
                         <div class="flex items-baseline gap-1 flex-shrink-0 pl-2">
-                            <span class="text-2xl font-bold tabular-nums" style="color:${color}">${status.minutesToNext}</span>
-                            <span class="text-xs text-apple-gray">分</span>
+                            <span class="text-2xl font-bold tabular-nums" style="color:${color}">${status.secondsToNext < 60 ? status.secondsToNext : status.minutesToNext}</span>
+                            <span class="text-xs text-apple-gray">${status.secondsToNext < 60 ? '秒' : '分'}</span>
                         </div>
                     </div>`;
                 } else {
@@ -630,7 +710,7 @@
                                     </div>
                                     <div class="text-right flex-shrink-0 pl-4">
                                         <p class="text-sm text-apple-gray">残り</p>
-                                        <p class="text-xl font-bold tabular-nums text-apple-blue">${status.remainingMinutes}<span class="text-sm font-normal text-apple-gray ml-1">分</span></p>
+                                        <p class="text-xl font-bold tabular-nums text-apple-blue">${status.remainingSeconds < 60 ? status.remainingSeconds : status.remainingMinutes}<span class="text-sm font-normal text-apple-gray ml-1">${status.remainingSeconds < 60 ? '秒' : '分'}</span></p>
                                     </div>
                                 </div>
                                 <div class="w-full bg-apple-borderLight dark:bg-apple-borderDark rounded-full h-2.5 overflow-hidden mt-3">
@@ -648,7 +728,7 @@
                                 <p class="text-lg font-bold">次は ${cell ? Utils.escapeHtml(cell.subject) : status.nextSlot.name}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-2xl font-bold tabular-nums text-apple-success">${status.minutesToNext}<span class="text-sm font-normal text-apple-gray ml-1">分前</span></p>
+                                <p class="text-2xl font-bold tabular-nums text-apple-success">${status.secondsToNext < 60 ? status.secondsToNext : status.minutesToNext}<span class="text-sm font-normal text-apple-gray ml-1">${status.secondsToNext < 60 ? '秒前' : '分前'}</span></p>
                             </div>
                         </div>`;
                 } else {
